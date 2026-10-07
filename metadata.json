@@ -1,0 +1,6 @@
+{
+  "name": "Customer Churn Prediction ML System",
+  "description": "Production-grade customer churn prediction machine learning pipeline, complete with EDA, multi-model evaluation, hyperparameter tuning, model persistence, FastAPI endpoint, and interactive dashboard.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

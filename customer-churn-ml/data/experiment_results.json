@@ -1,0 +1,856 @@
+{
+  "dataset_info": {
+    "name": "IBM Telco Customer Churn Dataset",
+    "source": "IBM Business Analytics / Kaggle Repository",
+    "rows": 7043,
+    "columns": 21,
+    "train_rows": 5634,
+    "test_rows": 1409,
+    "target_variable": "Churn",
+    "class_distribution": {
+      "No": 5174,
+      "Yes": 1869,
+      "churn_rate_pct": 26.54
+    },
+    "numerical_features": [
+      "tenure",
+      "MonthlyCharges"
+    ],
+    "categorical_features": [
+      "customerID",
+      "gender",
+      "SeniorCitizen",
+      "Partner",
+      "Dependents",
+      "PhoneService",
+      "MultipleLines",
+      "InternetService",
+      "OnlineSecurity",
+      "OnlineBackup",
+      "DeviceProtection",
+      "TechSupport",
+      "StreamingTV",
+      "StreamingMovies",
+      "Contract",
+      "PaperlessBilling",
+      "PaymentMethod",
+      "TotalCharges"
+    ],
+    "data_quality": {
+      "missing_values": 0,
+      "empty_total_charges_rows": 11,
+      "duplicates": 0,
+      "resolution": "Coerced TotalCharges whitespace to float with 0.0 imputation for 0-tenure accounts; dropped customerID; one-hot encoded categories."
+    }
+  },
+  "feature_engineering": {
+    "tenure_group": "Categorizes continuous tenure into business lifecycle brackets (0-12m, 13-24m, 25-48m, 49-60m, >60m). Telecom customers experience highest churn hazard in their first year (onboarding friction / discount expiration). Discretization captures non-linear survival curve dynamics.",
+    "total_services": "Integer sum (0-6) of subscribed add-on services (Online Security, Backup, Device Protection, Tech Support, Streaming TV, Streaming Movies). Higher service 'stickiness' increases switching costs and significantly reduces churn likelihood.",
+    "charges_ratio": "Ratio of TotalCharges divided by (MonthlyCharges * tenure). Detects billing anomalies, past plan upgrades, or discounting adjustments.",
+    "charges_per_tenure": "MonthlyCharges divided by tenure. Identifies newer high-expenditure customers who are particularly sensitive to rate hikes.",
+    "has_family_support": "Compound binary indicator for customers with both Partner and Dependents. Household accounts show higher stability and lower attrition.",
+    "streaming_bundle": "Indicates dual subscription to Streaming TV and Streaming Movies. Heavy content consumers have specific bandwidth demands and distinct churn patterns."
+  },
+  "baseline_models": {
+    "Logistic Regression": {
+      "model_name": "Logistic Regression",
+      "accuracy": 0.8062,
+      "precision": 0.67,
+      "recall": 0.5321,
+      "f1": 0.5931,
+      "roc_auc": 0.8466,
+      "confusion_matrix": {
+        "tn": 937,
+        "fp": 98,
+        "fn": 175,
+        "tp": 199
+      },
+      "roc_points": [
+        {
+          "fpr": 0.0,
+          "tpr": 0.0
+        },
+        {
+          "fpr": 0.0077,
+          "tpr": 0.1283
+        },
+        {
+          "fpr": 0.0155,
+          "tpr": 0.1952
+        },
+        {
+          "fpr": 0.029,
+          "tpr": 0.2647
+        },
+        {
+          "fpr": 0.0406,
+          "tpr": 0.3235
+        },
+        {
+          "fpr": 0.057,
+          "tpr": 0.3904
+        },
+        {
+          "fpr": 0.0657,
+          "tpr": 0.4412
+        },
+        {
+          "fpr": 0.0802,
+          "tpr": 0.492
+        },
+        {
+          "fpr": 0.1014,
+          "tpr": 0.5401
+        },
+        {
+          "fpr": 0.1208,
+          "tpr": 0.5775
+        },
+        {
+          "fpr": 0.142,
+          "tpr": 0.6176
+        },
+        {
+          "fpr": 0.1594,
+          "tpr": 0.6444
+        },
+        {
+          "fpr": 0.1855,
+          "tpr": 0.6791
+        },
+        {
+          "fpr": 0.1942,
+          "tpr": 0.7086
+        },
+        {
+          "fpr": 0.2077,
+          "tpr": 0.738
+        },
+        {
+          "fpr": 0.2541,
+          "tpr": 0.762
+        },
+        {
+          "fpr": 0.2918,
+          "tpr": 0.7888
+        },
+        {
+          "fpr": 0.313,
+          "tpr": 0.8262
+        },
+        {
+          "fpr": 0.3382,
+          "tpr": 0.8556
+        },
+        {
+          "fpr": 0.3787,
+          "tpr": 0.8877
+        },
+        {
+          "fpr": 0.4155,
+          "tpr": 0.9118
+        },
+        {
+          "fpr": 0.4638,
+          "tpr": 0.9358
+        },
+        {
+          "fpr": 0.543,
+          "tpr": 0.9599
+        },
+        {
+          "fpr": 0.6058,
+          "tpr": 0.9786
+        },
+        {
+          "fpr": 1.0,
+          "tpr": 1.0
+        }
+      ]
+    },
+    "Decision Tree": {
+      "model_name": "Decision Tree",
+      "accuracy": 0.7921,
+      "precision": 0.6441,
+      "recall": 0.484,
+      "f1": 0.5527,
+      "roc_auc": 0.8177,
+      "confusion_matrix": {
+        "tn": 935,
+        "fp": 100,
+        "fn": 193,
+        "tp": 181
+      },
+      "roc_points": [
+        {
+          "fpr": 0.0,
+          "tpr": 0.0
+        },
+        {
+          "fpr": 0.0039,
+          "tpr": 0.0187
+        },
+        {
+          "fpr": 0.0087,
+          "tpr": 0.131
+        },
+        {
+          "fpr": 0.0357,
+          "tpr": 0.2513
+        },
+        {
+          "fpr": 0.0367,
+          "tpr": 0.2727
+        },
+        {
+          "fpr": 0.0541,
+          "tpr": 0.3422
+        },
+        {
+          "fpr": 0.0667,
+          "tpr": 0.3957
+        },
+        {
+          "fpr": 0.0966,
+          "tpr": 0.484
+        },
+        {
+          "fpr": 0.1005,
+          "tpr": 0.5027
+        },
+        {
+          "fpr": 0.1594,
+          "tpr": 0.6016
+        },
+        {
+          "fpr": 0.1874,
+          "tpr": 0.631
+        },
+        {
+          "fpr": 0.2193,
+          "tpr": 0.6845
+        },
+        {
+          "fpr": 0.2473,
+          "tpr": 0.7246
+        },
+        {
+          "fpr": 0.2551,
+          "tpr": 0.7406
+        },
+        {
+          "fpr": 0.2725,
+          "tpr": 0.762
+        },
+        {
+          "fpr": 0.2899,
+          "tpr": 0.7754
+        },
+        {
+          "fpr": 0.3227,
+          "tpr": 0.7995
+        },
+        {
+          "fpr": 0.3411,
+          "tpr": 0.8155
+        },
+        {
+          "fpr": 0.3768,
+          "tpr": 0.8503
+        },
+        {
+          "fpr": 0.3971,
+          "tpr": 0.8529
+        },
+        {
+          "fpr": 0.5063,
+          "tpr": 0.9011
+        },
+        {
+          "fpr": 0.5459,
+          "tpr": 0.9332
+        },
+        {
+          "fpr": 0.6251,
+          "tpr": 0.9652
+        },
+        {
+          "fpr": 0.7401,
+          "tpr": 0.9786
+        },
+        {
+          "fpr": 1.0,
+          "tpr": 1.0
+        }
+      ]
+    },
+    "Random Forest": {
+      "model_name": "Random Forest",
+      "accuracy": 0.7871,
+      "precision": 0.6259,
+      "recall": 0.492,
+      "f1": 0.5509,
+      "roc_auc": 0.8233,
+      "confusion_matrix": {
+        "tn": 925,
+        "fp": 110,
+        "fn": 190,
+        "tp": 184
+      },
+      "roc_points": [
+        {
+          "fpr": 0.0,
+          "tpr": 0.0
+        },
+        {
+          "fpr": 0.0019,
+          "tpr": 0.0348
+        },
+        {
+          "fpr": 0.0048,
+          "tpr": 0.0722
+        },
+        {
+          "fpr": 0.0106,
+          "tpr": 0.0963
+        },
+        {
+          "fpr": 0.0174,
+          "tpr": 0.1578
+        },
+        {
+          "fpr": 0.0251,
+          "tpr": 0.1952
+        },
+        {
+          "fpr": 0.0319,
+          "tpr": 0.2406
+        },
+        {
+          "fpr": 0.0444,
+          "tpr": 0.2995
+        },
+        {
+          "fpr": 0.0541,
+          "tpr": 0.3476
+        },
+        {
+          "fpr": 0.0676,
+          "tpr": 0.4064
+        },
+        {
+          "fpr": 0.086,
+          "tpr": 0.4492
+        },
+        {
+          "fpr": 0.1005,
+          "tpr": 0.4759
+        },
+        {
+          "fpr": 0.1169,
+          "tpr": 0.5107
+        },
+        {
+          "fpr": 0.1362,
+          "tpr": 0.5561
+        },
+        {
+          "fpr": 0.1643,
+          "tpr": 0.6123
+        },
+        {
+          "fpr": 0.2097,
+          "tpr": 0.6631
+        },
+        {
+          "fpr": 0.2551,
+          "tpr": 0.754
+        },
+        {
+          "fpr": 0.3043,
+          "tpr": 0.8102
+        },
+        {
+          "fpr": 0.3488,
+          "tpr": 0.8556
+        },
+        {
+          "fpr": 0.3884,
+          "tpr": 0.8717
+        },
+        {
+          "fpr": 0.4638,
+          "tpr": 0.9037
+        },
+        {
+          "fpr": 0.5478,
+          "tpr": 0.9251
+        },
+        {
+          "fpr": 0.628,
+          "tpr": 0.9492
+        },
+        {
+          "fpr": 0.7188,
+          "tpr": 0.9813
+        },
+        {
+          "fpr": 1.0,
+          "tpr": 1.0
+        }
+      ]
+    },
+    "Gradient Boosting": {
+      "model_name": "Gradient Boosting",
+      "accuracy": 0.7977,
+      "precision": 0.654,
+      "recall": 0.5053,
+      "f1": 0.5701,
+      "roc_auc": 0.8437,
+      "confusion_matrix": {
+        "tn": 935,
+        "fp": 100,
+        "fn": 185,
+        "tp": 189
+      },
+      "roc_points": [
+        {
+          "fpr": 0.0,
+          "tpr": 0.0
+        },
+        {
+          "fpr": 0.0087,
+          "tpr": 0.1283
+        },
+        {
+          "fpr": 0.0232,
+          "tpr": 0.2139
+        },
+        {
+          "fpr": 0.0338,
+          "tpr": 0.2834
+        },
+        {
+          "fpr": 0.0531,
+          "tpr": 0.3342
+        },
+        {
+          "fpr": 0.0647,
+          "tpr": 0.4011
+        },
+        {
+          "fpr": 0.0773,
+          "tpr": 0.4465
+        },
+        {
+          "fpr": 0.0937,
+          "tpr": 0.4866
+        },
+        {
+          "fpr": 0.1072,
+          "tpr": 0.5535
+        },
+        {
+          "fpr": 0.1285,
+          "tpr": 0.5963
+        },
+        {
+          "fpr": 0.1556,
+          "tpr": 0.631
+        },
+        {
+          "fpr": 0.1758,
+          "tpr": 0.6765
+        },
+        {
+          "fpr": 0.2029,
+          "tpr": 0.7059
+        },
+        {
+          "fpr": 0.2184,
+          "tpr": 0.7326
+        },
+        {
+          "fpr": 0.2589,
+          "tpr": 0.7701
+        },
+        {
+          "fpr": 0.287,
+          "tpr": 0.8075
+        },
+        {
+          "fpr": 0.3179,
+          "tpr": 0.8316
+        },
+        {
+          "fpr": 0.3623,
+          "tpr": 0.869
+        },
+        {
+          "fpr": 0.3952,
+          "tpr": 0.9011
+        },
+        {
+          "fpr": 0.4734,
+          "tpr": 0.9332
+        },
+        {
+          "fpr": 0.5575,
+          "tpr": 0.9599
+        },
+        {
+          "fpr": 0.6406,
+          "tpr": 0.984
+        },
+        {
+          "fpr": 0.7836,
+          "tpr": 0.9947
+        },
+        {
+          "fpr": 0.887,
+          "tpr": 0.9973
+        },
+        {
+          "fpr": 1.0,
+          "tpr": 1.0
+        }
+      ]
+    }
+  },
+  "best_baseline_model": "Logistic Regression",
+  "hyperparameter_tuning": {
+    "model_name": "Logistic Regression",
+    "best_params": {
+      "C": 0.1,
+      "solver": "lbfgs"
+    },
+    "best_cv_roc_auc": 0.8482,
+    "test_metrics": {
+      "model_name": "Logistic Regression (Tuned)",
+      "accuracy": 0.8084,
+      "precision": 0.6818,
+      "recall": 0.5214,
+      "f1": 0.5909,
+      "roc_auc": 0.8467,
+      "confusion_matrix": {
+        "tn": 944,
+        "fp": 91,
+        "fn": 179,
+        "tp": 195
+      },
+      "roc_points": [
+        {
+          "fpr": 0.0,
+          "tpr": 0.0
+        },
+        {
+          "fpr": 0.0087,
+          "tpr": 0.1631
+        },
+        {
+          "fpr": 0.0174,
+          "tpr": 0.2059
+        },
+        {
+          "fpr": 0.0309,
+          "tpr": 0.254
+        },
+        {
+          "fpr": 0.0396,
+          "tpr": 0.3235
+        },
+        {
+          "fpr": 0.0531,
+          "tpr": 0.377
+        },
+        {
+          "fpr": 0.0657,
+          "tpr": 0.4278
+        },
+        {
+          "fpr": 0.0783,
+          "tpr": 0.4893
+        },
+        {
+          "fpr": 0.0947,
+          "tpr": 0.5374
+        },
+        {
+          "fpr": 0.1169,
+          "tpr": 0.5695
+        },
+        {
+          "fpr": 0.1314,
+          "tpr": 0.6016
+        },
+        {
+          "fpr": 0.1517,
+          "tpr": 0.6257
+        },
+        {
+          "fpr": 0.17,
+          "tpr": 0.6631
+        },
+        {
+          "fpr": 0.1894,
+          "tpr": 0.7005
+        },
+        {
+          "fpr": 0.2145,
+          "tpr": 0.7299
+        },
+        {
+          "fpr": 0.2464,
+          "tpr": 0.762
+        },
+        {
+          "fpr": 0.2908,
+          "tpr": 0.7914
+        },
+        {
+          "fpr": 0.3053,
+          "tpr": 0.8209
+        },
+        {
+          "fpr": 0.3304,
+          "tpr": 0.8529
+        },
+        {
+          "fpr": 0.3498,
+          "tpr": 0.8797
+        },
+        {
+          "fpr": 0.4039,
+          "tpr": 0.9037
+        },
+        {
+          "fpr": 0.4522,
+          "tpr": 0.9305
+        },
+        {
+          "fpr": 0.5527,
+          "tpr": 0.9572
+        },
+        {
+          "fpr": 0.6126,
+          "tpr": 0.9786
+        },
+        {
+          "fpr": 1.0,
+          "tpr": 1.0
+        }
+      ]
+    }
+  },
+  "feature_importances": [
+    {
+      "feature": "Contract_Two year",
+      "importance": 1.2039
+    },
+    {
+      "feature": "tenure",
+      "importance": 0.671
+    },
+    {
+      "feature": "InternetService_Fiber optic",
+      "importance": 0.6383
+    },
+    {
+      "feature": "Contract_One year",
+      "importance": 0.6225
+    },
+    {
+      "feature": "PaperlessBilling_Yes",
+      "importance": 0.3764
+    },
+    {
+      "feature": "MultipleLines_Yes",
+      "importance": 0.3412
+    },
+    {
+      "feature": "PaymentMethod_Electronic check",
+      "importance": 0.3369
+    },
+    {
+      "feature": "PhoneService_Yes",
+      "importance": 0.3325
+    },
+    {
+      "feature": "OnlineSecurity_Yes",
+      "importance": 0.3276
+    },
+    {
+      "feature": "charges_per_tenure",
+      "importance": 0.3046
+    },
+    {
+      "feature": "MultipleLines_No phone service",
+      "importance": 0.2997
+    },
+    {
+      "feature": "TechSupport_Yes",
+      "importance": 0.2796
+    },
+    {
+      "feature": "streaming_bundle_Yes",
+      "importance": 0.2751
+    },
+    {
+      "feature": "Dependents_Yes",
+      "importance": 0.1917
+    },
+    {
+      "feature": "tenure_group_25-48m",
+      "importance": 0.1831
+    }
+  ],
+  "metrics_explanations": {
+    "Accuracy": "Overall proportion of correct predictions: (TP + TN) / Total. In an imbalanced dataset (e.g. 73% non-churn, 27% churn), a naive model predicting 'No Churn' for everyone achieves 73.5% accuracy while being completely useless for retention. Therefore, accuracy alone is insufficient.",
+    "Precision": "Proportion of predicted churners who actually churned: TP / (TP + FP). High precision prevents spending expensive retention budgets (e.g. $100 loyalty credits or handset subsidies) on satisfied customers who were never going to leave.",
+    "Recall": "Proportion of actual churners correctly detected: TP / (TP + FN). In customer retention, missing a churner (False Negative) means permanently losing customer lifetime value (LTV). Recall measures how thoroughly the company catches departing accounts.",
+    "F1-Score": "Harmonic mean of Precision and Recall: 2 * (P * R) / (P + R). Balances the tradeoff between budget waste (False Positives) and customer loss (False Negatives). Crucial metric for selecting models on skewed target distributions.",
+    "ROC-AUC": "Area Under the Receiver Operating Characteristic Curve. Evaluates the classifier's ability to rank churners higher than non-churners across all possible decision thresholds (0.0 to 1.0). An AUC of 0.84+ indicates strong discriminative power.",
+    "Confusion Matrix": "2x2 contingency table contrasting Actual vs. Predicted outcomes: True Negatives (retained kept), False Positives (retained flagged as churn), False Negatives (churners missed), True Positives (churners caught)."
+  },
+  "unseen_predictions": [
+    {
+      "customer_id": "UNSEEN-001",
+      "profile_name": "High-Risk New Digital Streamer",
+      "prediction": "Churn",
+      "churn_probability": 0.8519,
+      "churn_probability_percentage": "85.2%",
+      "verdict": "Customer is likely to churn",
+      "diagnostics": {
+        "risk_level": "High",
+        "key_risk_drivers": [
+          "Month-to-month commitment provides zero switching barriers.",
+          "Early lifecycle customer (2.0 months tenure); high initial hazard period.",
+          "High monthly billing ($89.85/mo); customer sensitive to price-to-value.",
+          "Fiber optic user without Tech Support/Online Security (common source of frustration).",
+          "Payment via Electronic Check exhibits highest historical churn correlation."
+        ],
+        "retention_anchors": [],
+        "recommended_interventions": [
+          "Offer a 15% discount for upgrading to a 1-year or 2-year annual agreement.",
+          "Schedule a proactive onboarding concierge call and satisfaction check.",
+          "Review billing plan for bundled loyalty discount or service credit.",
+          "Provide complimentary Tech Support + Security suite for 3 months.",
+          "Incentivize enrollment in Credit Card or Bank Transfer Auto-Pay ($5 monthly credit)."
+        ]
+      },
+      "customer_input": {
+        "id": "UNSEEN-001",
+        "profile_name": "High-Risk New Digital Streamer",
+        "gender": "Female",
+        "SeniorCitizen": 0,
+        "Partner": "No",
+        "Dependents": "No",
+        "tenure": 2,
+        "PhoneService": "Yes",
+        "MultipleLines": "No",
+        "InternetService": "Fiber optic",
+        "OnlineSecurity": "No",
+        "OnlineBackup": "No",
+        "DeviceProtection": "No",
+        "TechSupport": "No",
+        "StreamingTV": "Yes",
+        "StreamingMovies": "Yes",
+        "Contract": "Month-to-month",
+        "PaperlessBilling": "Yes",
+        "PaymentMethod": "Electronic check",
+        "MonthlyCharges": 89.85,
+        "TotalCharges": 179.7
+      }
+    },
+    {
+      "customer_id": "UNSEEN-002",
+      "profile_name": "Low-Risk Long-Term Family Account",
+      "prediction": "No Churn",
+      "churn_probability": 0.0096,
+      "churn_probability_percentage": "1.0%",
+      "verdict": "Customer is likely to remain (No Churn)",
+      "diagnostics": {
+        "risk_level": "Low",
+        "key_risk_drivers": [],
+        "retention_anchors": [
+          "Long-term commitment (Two year) creates high retention stability.",
+          "High customer tenure (65.0 months) reflects established brand loyalty.",
+          "Economical monthly bill ($64.80/mo).",
+          "Automatic payment method enabled (reduces billing friction)."
+        ],
+        "recommended_interventions": [
+          "Maintain standard engagement check-ins."
+        ]
+      },
+      "customer_input": {
+        "id": "UNSEEN-002",
+        "profile_name": "Low-Risk Long-Term Family Account",
+        "gender": "Male",
+        "SeniorCitizen": 0,
+        "Partner": "Yes",
+        "Dependents": "Yes",
+        "tenure": 65,
+        "PhoneService": "Yes",
+        "MultipleLines": "Yes",
+        "InternetService": "DSL",
+        "OnlineSecurity": "Yes",
+        "OnlineBackup": "Yes",
+        "DeviceProtection": "Yes",
+        "TechSupport": "Yes",
+        "StreamingTV": "No",
+        "StreamingMovies": "No",
+        "Contract": "Two year",
+        "PaperlessBilling": "No",
+        "PaymentMethod": "Bank transfer (automatic)",
+        "MonthlyCharges": 64.8,
+        "TotalCharges": 4212.0
+      }
+    },
+    {
+      "customer_id": "UNSEEN-003",
+      "profile_name": "Moderate-Risk Mid-Tenure Solo Professional",
+      "prediction": "No Churn",
+      "churn_probability": 0.3532,
+      "churn_probability_percentage": "35.3%",
+      "verdict": "Customer is likely to remain (No Churn)",
+      "diagnostics": {
+        "risk_level": "Medium",
+        "key_risk_drivers": [
+          "High monthly billing ($84.40/mo); customer sensitive to price-to-value.",
+          "Fiber optic user without Tech Support/Online Security (common source of frustration)."
+        ],
+        "retention_anchors": [
+          "Long-term commitment (One year) creates high retention stability.",
+          "Automatic payment method enabled (reduces billing friction)."
+        ],
+        "recommended_interventions": [
+          "Review billing plan for bundled loyalty discount or service credit.",
+          "Provide complimentary Tech Support + Security suite for 3 months."
+        ]
+      },
+      "customer_input": {
+        "id": "UNSEEN-003",
+        "profile_name": "Moderate-Risk Mid-Tenure Solo Professional",
+        "gender": "Male",
+        "SeniorCitizen": 1,
+        "Partner": "No",
+        "Dependents": "No",
+        "tenure": 18,
+        "PhoneService": "Yes",
+        "MultipleLines": "Yes",
+        "InternetService": "Fiber optic",
+        "OnlineSecurity": "No",
+        "OnlineBackup": "Yes",
+        "DeviceProtection": "Yes",
+        "TechSupport": "No",
+        "StreamingTV": "Yes",
+        "StreamingMovies": "No",
+        "Contract": "One year",
+        "PaperlessBilling": "Yes",
+        "PaymentMethod": "Credit card (automatic)",
+        "MonthlyCharges": 84.4,
+        "TotalCharges": 1519.2
+      }
+    }
+  ]
+}
