@@ -174,8 +174,9 @@ app.post("/api/predict", (req, res) => {
 
   const scriptPath = path.join(__dirname, "customer-churn-ml", "src", "predict.py");
   const payloadStr = JSON.stringify(modelPayload);
+  const pythonExecutable = process.env.PYTHON_EXECUTABLE || (process.platform === "win32" ? "python" : "python3");
 
-  execFile("python3", [scriptPath, "--json", payloadStr], { maxBuffer: 1024 * 1024 }, (error, stdout, stderr) => {
+  execFile(pythonExecutable, [scriptPath, "--json", payloadStr], { maxBuffer: 1024 * 1024 }, (error, stdout, stderr) => {
     if (error) {
       console.error("Python inference error:", error, stderr);
       return res.status(500).json({
@@ -186,6 +187,10 @@ app.post("/api/predict", (req, res) => {
 
     try {
       const parsedResult = JSON.parse(stdout.trim());
+      if (parsedResult.error) {
+        return res.status(500).json({ error: parsedResult.error });
+      }
+
       // Explicitly attach conversion metadata to development response for verification
       parsedResult.inr_inputs = {
         MonthlyCharges: inrMonthly,

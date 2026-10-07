@@ -169,19 +169,40 @@ function cleanTenureInput(val: string): string {
   return cleaned;
 }
 
+function calculateTotalCharges(
+  monthlyCharges: number | string,
+  tenure: number | string,
+  currency: "USD" | "INR",
+): string {
+  if (String(monthlyCharges).trim() === "" || String(tenure).trim() === "") return "";
+
+  const monthlyAmount = Number(monthlyCharges);
+  const months = Number(tenure);
+  if (!Number.isFinite(monthlyAmount) || !Number.isFinite(months)) return "";
+
+  const total = monthlyAmount * months;
+  return currency === "INR" ? String(Math.round(total)) : total.toFixed(2);
+}
+
 export default function App() {
   const [currentPage, setCurrentPage] = useState<"home" | "predict" | "about">(
     "home"
   );
   const [currency, setCurrency] = useState<"USD" | "INR">("INR");
   const [formData, setFormData] = useState<FormState>(INITIAL_FORM);
+  const [totalChargesMode, setTotalChargesMode] = useState<"auto" | "manual">("auto");
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [predictionError, setPredictionError] = useState<string | null>(null);
   const [predictionResult, setPredictionResult] =
     useState<PredictionData>(INITIAL_PREDICTION);
 
   const currencySymbol = currency === "USD" ? "$" : "₹";
+  const totalChargesValue =
+    totalChargesMode === "auto"
+      ? calculateTotalCharges(formData.monthlyCharges, formData.tenure, currency)
+      : formData.totalCharges;
 
-  // Handle direct manual input change - never overwrite TotalCharges automatically
+  // Handle direct manual input changes.
   const handleInputChange = (field: keyof FormState, value: any) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
@@ -198,9 +219,20 @@ export default function App() {
     handleInputChange("totalCharges", cleanNumberInput(val));
   };
 
+  const handleTotalChargesModeChange = (mode: "auto" | "manual") => {
+    if (mode === "manual") {
+      setFormData((prev) => ({
+        ...prev,
+        totalCharges: calculateTotalCharges(prev.monthlyCharges, prev.tenure, currency),
+      }));
+    }
+    setTotalChargesMode(mode);
+  };
+
   const handleResetForm = () => {
     setFormData(INITIAL_FORM);
     setCurrency("INR");
+    setTotalChargesMode("auto");
   };
 
   // Toggle between USD and INR with accurate conversion
@@ -216,7 +248,9 @@ export default function App() {
       if (newCurrency === "INR") {
         // Convert USD to INR
         const inrM = m === "" || isNaN(m as number) ? "" : String(Math.round((m as number) / INR_TO_USD_RATE));
-        const inrT = t === "" || isNaN(t as number) ? "" : String(Math.round((t as number) / INR_TO_USD_RATE));
+        const inrT = totalChargesMode === "auto"
+          ? calculateTotalCharges(inrM, prev.tenure, "INR")
+          : t === "" || isNaN(t as number) ? "" : String(Math.round((t as number) / INR_TO_USD_RATE));
         return {
           ...prev,
           monthlyCharges: inrM,
@@ -225,7 +259,9 @@ export default function App() {
       } else {
         // Convert INR to USD
         const usdM = m === "" || isNaN(m as number) ? "" : String(Number(((m as number) * INR_TO_USD_RATE).toFixed(2)));
-        const usdT = t === "" || isNaN(t as number) ? "" : String(Number(((t as number) * INR_TO_USD_RATE).toFixed(2)));
+        const usdT = totalChargesMode === "auto"
+          ? calculateTotalCharges(usdM, prev.tenure, "USD")
+          : t === "" || isNaN(t as number) ? "" : String(Number(((t as number) * INR_TO_USD_RATE).toFixed(2)));
         return {
           ...prev,
           monthlyCharges: usdM,
@@ -239,10 +275,11 @@ export default function App() {
   const handlePredict = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     setIsLoading(true);
+    setPredictionError(null);
 
     try {
       const rawMonthly = Number(formData.monthlyCharges) || 0;
-      const rawTotal = Number(formData.totalCharges) || 0;
+      const rawTotal = Number(totalChargesValue) || 0;
 
       // Backend supports INR or USD
       const payload = {
@@ -276,7 +313,8 @@ export default function App() {
       });
 
       if (!res.ok) {
-        throw new Error(`Server returned HTTP ${res.status}`);
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.error || errorData.details || `Server returned HTTP ${res.status}`);
       }
 
       const data = await res.json();
@@ -331,6 +369,7 @@ export default function App() {
       });
     } catch (err) {
       console.error("Prediction error:", err);
+      setPredictionError(err instanceof Error ? err.message : "Prediction failed. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -965,29 +1004,50 @@ export default function App() {
                       )}
                     </div>
 
-                    {/* Total Charges (Manual Entry - No automatic calculation) */}
+                    {/* Total Charges */}
                     <div>
-                      <label className="block text-xs font-semibold text-slate-700 mb-1">
-                        Total Charges ({currencySymbol})
-                      </label>
+                      <div className="flex items-center justify-between gap-2 mb-1">
+                        <label className="text-xs font-semibold text-slate-700">
+                          Total Charges ({currencySymbol})
+                        </label>
+                        <div className="inline-flex rounded-lg border border-slate-200 bg-slate-100 p-0.5 text-[10px]">
+                          <button
+                            type="button"
+                            aria-pressed={totalChargesMode === "auto"}
+                            onClick={() => handleTotalChargesModeChange("auto")}
+                            className={`px-2 py-1 rounded-md font-semibold ${totalChargesMode === "auto" ? "bg-white text-blue-700 shadow-sm" : "text-slate-500"}`}
+                          >
+                            Auto
+                          </button>
+                          <button
+                            type="button"
+                            aria-pressed={totalChargesMode === "manual"}
+                            onClick={() => handleTotalChargesModeChange("manual")}
+                            className={`px-2 py-1 rounded-md font-semibold ${totalChargesMode === "manual" ? "bg-white text-blue-700 shadow-sm" : "text-slate-500"}`}
+                          >
+                            Manual
+                          </button>
+                        </div>
+                      </div>
                       <p className="text-[11px] text-slate-500 mb-1.5">
-                        {currency === "INR"
-                          ? "Enter the customer's total accumulated charges in INR."
-                          : "Enter the customer's total accumulated charges in USD."}
+                        {totalChargesMode === "auto"
+                          ? `Calculated from monthly charges x ${formData.tenure} months.`
+                          : `Enter the customer's total accumulated charges in ${currency}.`}
                       </p>
                       <input
                         type="text"
                         inputMode="decimal"
-                        value={formData.totalCharges}
+                        value={totalChargesValue}
+                        readOnly={totalChargesMode === "auto"}
                         onChange={(e) => handleTotalChargesChange(e.target.value)}
                         onFocus={(e) => e.target.select()}
-                        className="w-full bg-slate-50/80 border border-slate-200 rounded-lg px-3 py-2 text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white"
+                        className={`w-full border border-slate-200 rounded-lg px-3 py-2 text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 ${totalChargesMode === "auto" ? "bg-slate-100" : "bg-slate-50/80 focus:bg-white"}`}
                         placeholder={currency === "INR" ? "17400" : "180.00"}
                       />
-                      {currency === "INR" && (
+                      {currency === "INR" && totalChargesValue !== "" && (
                         <div className="text-[11px] text-blue-600 font-medium mt-1 flex items-center justify-between">
                           <span>
-                            Converted value: ${convert_inr_to_usd(Number(formData.totalCharges) || 0).toFixed(2)} USD
+                            Converted value: ${convert_inr_to_usd(Number(totalChargesValue) || 0).toFixed(2)} USD
                           </span>
                           <span className="text-[10px] text-slate-400">Rate: {INR_TO_USD_RATE}</span>
                         </div>
@@ -1010,6 +1070,12 @@ export default function App() {
                     <div className="bg-slate-50 border border-slate-200/80 rounded-xl p-3 text-xs text-slate-600">
                       <span>Standard USD dataset values sent directly to ML pipeline.</span>
                     </div>
+                  )}
+
+                  {predictionError && (
+                    <p role="alert" className="text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+                      Prediction failed: {predictionError}
+                    </p>
                   )}
 
                   {/* Gradient "Predict Churn" Button */}
